@@ -89,6 +89,24 @@ end
 
 %% RANGE MEASUREMENT
 
+%% Try along these lines - Begin section (Aditya)
+Mix_mat = reshape(Mix1,[1, Nr*Nd]);
+fft_mix = fft(Mix_mat, Nr, 2);
+P2 = abs(fft_mix/(Nr*Nd));
+P1 = P2(1:Nr/2+1);
+
+%plotting the range
+figure ('Name','Range from First FFT')
+subplot(2,1,1)
+
+% Plotting
+f = fc*(0:(Nr/2))/(Nr);
+plot(f, P1);
+title('Single-Sided Amplitude Spectrum of X(t)')
+xlabel('f (Hz)')
+ylabel('|P1(f)|')
+%% - End Section (Aditya)
+
 
  % *%TODO* :
 %reshape the vector into Nr*Nd array. Nr and Nd here would also define the size of
