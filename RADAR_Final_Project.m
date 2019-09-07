@@ -92,7 +92,7 @@ end
 %% Try along these lines - Begin section (Aditya)
 Mix_mat = reshape(Mix1,[1, Nr*Nd]);
 fft_mix = fft(Mix_mat, Nr, 2);
-P2 = abs(fft_mix/(Nr*Nd));
+P2 = abs(fft_mix/(Nr));
 P1 = P2(1:Nr/2+1);
 
 %plotting the range
