@@ -71,11 +71,20 @@ for i=1:length(t)
     %For each time stamp update the Range of the Target for constant velocity. 
     r_t(i) = init_range + init_vel * t(i);      % Refer this again!!!
     % delayed time or trip time
-    td(i) = 2*r_t(i)/c;
+    
+    % Aditya - the 2 is not needed below
+    % td(i) = 2*r_t(i)/c; % Buggy code
+    td(i) = r_t(i)/c;     % Fixed code
+    
     % *%TODO* :
     %For each time sample we need to update the transmitted and
-    %received signal. 
-    Tx(i)  =  cos(2*pi*(fc*i+(slope*(t(i)^2))/2));
+    %received signal.
+    
+    % Aditya: the Tx(i) code has a bug where fc is multiplied with i instead of t(i). 
+    %   commented the buggy line and added fixed line below it.
+    % Tx(i)  =  cos(2*pi*(fc*i+(slope*(t(i)^2))/2));  % Buggy code
+    Tx(i)  =  cos(2*pi*(fc*t(i)+(slope*(t(i)^2))/2)); % Fixed code
+    
     Rx(i)  =  cos(2*pi*(fc*(t(i)-td(i))+(slope*((t(i)-td(i))^2))/2));
     
     % *%TODO* :
@@ -90,21 +99,16 @@ end
 %% RANGE MEASUREMENT
 
 %% Try along these lines - Begin section (Aditya)
-Mix_mat = reshape(Mix1,[1, Nr*Nd]);
-fft_mix = fft(Mix_mat, Nr, 2);
-P2 = abs(fft_mix/(Nr));
+Mix_mat = reshape(Mix1,[Nr, Nd]);
+fft_mix = fft(Mix_mat);
+P2 = abs(fft_mix/Nr);
 P1 = P2(1:Nr/2+1);
 
-%plotting the range
-figure ('Name','Range from First FFT')
-subplot(2,1,1)
-
-% Plotting
-f = fc*(0:(Nr/2))/(Nr);
+% Plotting the range using the output of first FFT
+figure('Name', 'Range from first FFT');
+f = (Nr / length(P1)) * (0 : (Nr / 2));
 plot(f, P1);
-title('Single-Sided Amplitude Spectrum of X(t)')
-xlabel('f (Hz)')
-ylabel('|P1(f)|')
+axis([0 200 0 0.5]);
 %% - End Section (Aditya)
 
 
