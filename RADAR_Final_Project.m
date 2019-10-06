@@ -73,8 +73,8 @@ for i=1:length(t)
     % delayed time or trip time
     
     % Aditya - the 2 is not needed below
-    % td(i) = 2*r_t(i)/c; % Buggy code
-    td(i) = r_t(i)/c;     % Fixed code
+     td(i) = 2*r_t(i)/c; % Buggy code
+    % td(i) = r_t(i)/c;     % Fixed code
     
     % *%TODO* :
     %For each time sample we need to update the transmitted and
@@ -98,58 +98,59 @@ end
 
 %% RANGE MEASUREMENT
 
-%% Try along these lines - Begin section (Aditya)
-Mix_mat = reshape(Mix1,[Nr, Nd]);
-fft_mix = fft(Mix_mat);
-P2 = abs(fft_mix/Nr);
-P1 = P2(1:Nr/2+1);
+ %% Try along these lines - Begin section (Aditya)
+% Mix_mat = reshape(Mix1,[Nr, Nd]);
+% fft_mix = fft(Mix_mat);
+% P2 = abs(fft_mix/Nr);
+% P1 = P2(1:Nr/2+1);
+% 
+% % Plotting the range using the output of first FFT
+% figure('Name', 'Range from first FFT');
+% f = (Nr / length(P1)) * (0 : (Nr / 2));
+% plot(f, P1);
+% axis([0 200 0 0.5]);
+% - End Section (Aditya)
 
-% Plotting the range using the output of first FFT
-figure('Name', 'Range from first FFT');
-f = (Nr / length(P1)) * (0 : (Nr / 2));
-plot(f, P1);
-axis([0 200 0 0.5]);
-%% - End Section (Aditya)
 
-
- % *%TODO* :
+ %% *%TODO* :
 %reshape the vector into Nr*Nd array. Nr and Nd here would also define the size of
 %Range and Doppler FFT respectively.
 % Mix_mat = vec2mat(Mix,Nd)   ---    This needs Communication Toolbox though. 
+
 Mix_mat = reshape(Mix1,Nr,Nd);
- % *%TODO* :
+%Mix_mat1= reshape(Mix1,[1,Nd*Nr]);
+
+% *%TODO* :
 %run the FFT on the beat signal along the range bins dimension (Nr) and
 %normalize.
 
 % fft_mix_trans = fft2(Mix_mat');
 % fft_mix = fft_mix_trans';
 
-fft_mix = fft(Mix_mat,[],2);
+fft_mix = fft(Mix_mat,[],1);
 
 % *%TODO* :
 % Take the absolute value of FFT output
-fft_mix = abs(fft_mix);
+fft_mix = abs(fft_mix/Nr);
  % *%TODO* :
 % Output of FFT is double sided signal, but we are interested in only one side of the spectrum.
 % Hence we throw out half of the samples.
- fft_mix_half = fft_mix(1:1024*128/2);
+ fft_mix_half = fft_mix(1:Nr/2);
 
 
 %plotting the range
-figure ('Name','Range from First FFT')
-subplot(2,1,1)
+figure ('Name','Range from First FFT');
+% subplot(2,1,1);
 
-
- % *%TODO* :
- % plot FFT output 
+% *%TODO* :
+% plot FFT output 
  
- f = fc*(0:(1024*128/2)-1)/1024*128;
+f = fc*(0:(Nr/2)-1)/Nr; 
 %  plot(f,fft_mix_half);
- 
- plot (fft_mix_half)
+plot (fft_mix_half)
 
  
-axis ([0 200 0 1]);
+axis ([0 200 0 0.5]);
 
 
 
@@ -196,7 +197,7 @@ Td = 4;
 %test (CUT) for accurate estimation
 Gr = 1;
 Gd = 2;
-CUT = RDM(Gr+Tr+1,Gd+Td+1)
+CUT = RDM(Gr+Tr+1,Gd+Td+1);
 % *%TODO* :
 % offset the threshold by SNR value in dB
 offset_dB = 6;
@@ -249,11 +250,8 @@ for j = Gd+Td+1 : Nd-Gd-Td
     
 
 end
+%signal_cfar = [signal_cfar,0];
 end
-   
-
-signal_cfar=reshape(signal_cfar,[Nr/2,Nd]);
-
 
 
 % *%TODO* :
@@ -262,20 +260,19 @@ signal_cfar=reshape(signal_cfar,[Nr/2,Nd]);
 %matrix. Hence,few cells will not be thresholded. To keep the map size same
 % set those values to 0. 
  
+zerosLength = ((Nr/2)*Nd)-length(signal_cfar)
+signal_cfar = [signal_cfar,zeros(1,zerosLength)];
 
-
-
-
-
+signal_cfar=reshape(signal_cfar,[Nr/2,Nd]);
 
 
 
 % *%TODO* :
 %display the CFAR output using the Surf function like we did for Range
 %Doppler Response output.
+
 doppler_axis = linspace(-100,100,Nd);
 range_axis = linspace(-200,200,Nr/2)*((Nr/2)/400);
-
 figure,surf(doppler_axis,range_axis,signal_cfar);
 colorbar;
 
