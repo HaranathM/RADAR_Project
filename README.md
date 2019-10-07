@@ -1,7 +1,7 @@
 # **RADAR Project**
 
 1. Training Cells and Guard Cells:
-* Training Cells of '2-by-4' size and Guard Cells are of '1-by-2' size are considered after trail and error.
+* Training Cells of `2*4` size and Guard Cells are of '1-by-2' size are considered after trail and error.
 * As more number of training cells(like '6-by-8' or '8-by-8' ) are giving more detections, a lesser number is considered
 
 2. Offset Value
