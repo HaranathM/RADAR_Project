@@ -150,7 +150,7 @@ f = fc*(0:(Nr/2)-1)/Nr;
 plot (fft_mix_half)
 
  
-axis ([0 200 0 0.5]);
+axis ([0 200 0 0.4]);
 
 
 
@@ -200,7 +200,7 @@ Gd = 2;
 CUT = RDM(Gr+Tr+1,Gd+Td+1);
 % *%TODO* :
 % offset the threshold by SNR value in dB
-offset_dB = 6;
+offset_dB = 7;    % Offset is taken in dB
 
 % *%TODO* :
 %Create a vector to store noise_level for each iteration on training cells
@@ -222,7 +222,7 @@ noise_level = zeros(1,1);
    % Use RDM[x,y] as the matrix from the output of 2D FFT for implementing
    % CFAR
    
-   GrdGridArray = [];
+GrdGridArray = [];
 threshold_cfar = [];  % Threshold values Vector. 
 signal_cfar = [];   % Final Signal Vector
 for i = Gr+Tr+1:Nr/2-Gr-Tr
