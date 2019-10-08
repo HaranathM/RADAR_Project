@@ -16,7 +16,7 @@ clc;
 % define the target's initial position and velocity. Note : Velocity
 % remains contant
 
-init_range = 160;         % initial position(relative to radar) in meters. 
+init_range = 60;         % initial position(relative to radar) in meters. 
 init_vel = 50;            % initial velocity in m/s.
  
 
@@ -189,14 +189,14 @@ figure,surf(doppler_axis,range_axis,RDM);
 
 % *%TODO* :
 %Select the number of Training Cells in both the dimensions.
-Tr = 2;
-Td = 4;
+Tr = 11;
+Td = 11;
 
 % *%TODO* :
 %Select the number of Guard Cells in both dimensions around the Cell under 
 %test (CUT) for accurate estimation
-Gr = 1;
-Gd = 2;
+Gr = 6;
+Gd = 6;
 CUT = RDM(Gr+Tr+1,Gd+Td+1);
 % *%TODO* :
 % offset the threshold by SNR value in dB
@@ -204,8 +204,8 @@ offset_dB = 7;    % Offset is taken in dB
 
 % *%TODO* :
 %Create a vector to store noise_level for each iteration on training cells
-noise_level = zeros(1,1);
-
+[RDMRows RDMColumns] = size(RDM);
+OutputMatrix = zeros(size(RDM));
 
 % *%TODO* :
 %design a loop such that it slides the CUT across range doppler map by
@@ -221,12 +221,12 @@ noise_level = zeros(1,1);
 
    % Use RDM[x,y] as the matrix from the output of 2D FFT for implementing
    % CFAR
-   
+  
 GrdGridArray = [];
 threshold_cfar = [];  % Threshold values Vector. 
-signal_cfar = [];   % Final Signal Vector
-for i = Gr+Tr+1:Nr/2-Gr-Tr
-for j = Gd+Td+1 : Nd-Gd-Td
+signal_cfar = [];     % Final Signal Vector
+for i = Gr+Tr+1:Nr/2-Gr-Tr    %(RDMRows = Nr/2)
+for j = Gd+Td+1 : Nd-Gd-Td    %(RDMColumns = Nd)   
     CUT = RDM(i,j);
     FullGrid = RDM(i-Gr-Tr: i+Gr+Tr, j-Gd-Td: j+Gd+Td);
     GrdGrid = RDM(i-Gr : i+Gr,j-Gd : j+Gd);
@@ -243,10 +243,9 @@ for j = Gd+Td+1 : Nd-Gd-Td
     threshold_cfar = [threshold_cfar, {threshold_scaled}];
     signal_level = CUT-threshold_scaled;
     if (signal_level>0)
-          CUT = 1;
-    else CUT = 0;
+          OutputMatrix(i,j) = 1;
     end
-        signal_cfar = [signal_cfar,CUT];
+       
     
 
 end
@@ -260,10 +259,10 @@ end
 %matrix. Hence,few cells will not be thresholded. To keep the map size same
 % set those values to 0. 
  
-zerosLength = ((Nr/2)*Nd)-length(signal_cfar)
-signal_cfar = [signal_cfar,zeros(1,zerosLength)];
+%   zerosLength = ((Nr/2)*Nd)-length(signal_cfar)
+%   signal_cfar = [signal_cfar,zeros(1,zerosLength)];
 
-signal_cfar=reshape(signal_cfar,[Nr/2,Nd]);
+%   signal_cfar=reshape(signal_cfar,[Nr/2,Nd]);
 
 
 
@@ -273,7 +272,7 @@ signal_cfar=reshape(signal_cfar,[Nr/2,Nd]);
 
 doppler_axis = linspace(-100,100,Nd);
 range_axis = linspace(-200,200,Nr/2)*((Nr/2)/400);
-figure,surf(doppler_axis,range_axis,signal_cfar);
+figure,surf(doppler_axis,range_axis,OutputMatrix);
 colorbar;
 
 
